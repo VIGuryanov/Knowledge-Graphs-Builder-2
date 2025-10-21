@@ -1,0 +1,8 @@
+beautifulsoup4 == 4.13.4
+requests == 2.32.3
+networkx == 3.4.2
+matplotlib == 3.10.1
+SPARQLWrapper == 2.0.0
+sqlalchemy == 2.0.40
+pyodbc == 5.2.0
+git+https://github.com/OpenLinkSoftware/Virtuoso-SQLAlchemy.git
