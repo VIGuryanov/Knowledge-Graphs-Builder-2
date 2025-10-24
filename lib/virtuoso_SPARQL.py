@@ -1,6 +1,7 @@
 from SPARQLWrapper import SPARQLWrapper, JSON, POST, DIGEST
 from lib.triple import Triple, TripleItem, TripleItemType, TripleItemVariable
 import copy
+import traceback
 
 class VirtuosoSPARQL:
     def __init__(self, domain):
@@ -100,7 +101,7 @@ class VirtuosoSPARQL:
             self.sparql.setQuery(query)
             return self.sparql.query().convert()
         except Exception as e:
-            print(e)
+            print(traceback.format_exc())
         
 class VirtuosoSPARQLAuth(VirtuosoSPARQL):
     def __init__(self, domain, login, password, autocommit = False):
@@ -119,7 +120,8 @@ class VirtuosoSPARQLAuth(VirtuosoSPARQL):
         self.execute_commit_query(f"CREATE GRAPH <{graph_iri}>")
 
     def drop_graph(self, graph_iri):
-        self.execute_commit_query(f"DROP GRAPH <{graph_iri}>")
+        # SILENT – эквивалент IF EXISTS из SQL
+        self.execute_commit_query(f"DROP SILENT GRAPH <{graph_iri}>")
 
     def insert(self, graph_iri, values: list[Triple]):
         inserts = map(lambda x: f'INSERT IN GRAPH <{graph_iri}> {{ {str(x.subject)} {str(x.predicate)} {str(x.object)} }}', values)

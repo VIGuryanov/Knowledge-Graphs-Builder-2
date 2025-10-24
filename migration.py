@@ -1,6 +1,6 @@
 import sqlalchemy as db
 from lib.virtuoso_SPARQL import VirtuosoSPARQLAuth
-from lib.virtuoso_SQL import VirtuosoSQL
+from lib.postgres_SQL import PostgreSQL
 from lib.triple import Triple, TripleItem, TripleItemType, TripleItemInt, TripleItemIri, TripleItemStr, TripleItemVariable
 from database_models.DBModels import Entities, Predicates
 from graph_logic import GraphLogic
@@ -10,7 +10,7 @@ from lib.standard_predicates import StandardPredicates
 # Create an in-memory SQLite database engine
 class Migration:
 
-    def __init__(self, sparql_connection: VirtuosoSPARQLAuth, sql_connection: VirtuosoSQL):
+    def __init__(self, sparql_connection: VirtuosoSPARQLAuth, sql_connection: PostgreSQL):
         self.sparql_connection = sparql_connection
         self.sql_connection = sql_connection
 
@@ -62,17 +62,20 @@ class Migration:
             Triple(StandardPredicates._wikidata_id, StandardPredicates._comment, TripleItemStr('An id on Wikidata resource')),
             ])
         
-        query = db.insert(predicates).values(Id = 1, iri = StandardPredicates._class.value)
+        # Убрал конкретные значения Id, потому что в Postgres последовательность, отвечающая за primary key, рассинхронизируется
+        # Потому что последовательность не знает, что в таблице уже 6 элементов, и начинает с 1, из-за чего при вставке ошибка
+        # Из-за последовательности выполнения команд Id все равно должны быть такими, как раньше
+        query = db.insert(predicates).values(iri = StandardPredicates._class.value) # Id = 1, 
         connection.execute(query)
-        query = db.insert(predicates).values(Id = 2, iri = StandardPredicates._label.value)
+        query = db.insert(predicates).values(iri = StandardPredicates._label.value) # Id = 2, 
         connection.execute(query)
-        query = db.insert(predicates).values(Id = 3, iri = StandardPredicates._comment.value)
+        query = db.insert(predicates).values(iri = StandardPredicates._comment.value) # Id = 3, 
         connection.execute(query)
-        query = db.insert(predicates).values(Id = 4, iri = StandardPredicates._predicate.value)
+        query = db.insert(predicates).values(iri = StandardPredicates._predicate.value) # Id = 4, 
         connection.execute(query)
-        query = db.insert(predicates).values(Id = 5, iri = StandardPredicates._entity.value)
+        query = db.insert(predicates).values(iri = StandardPredicates._entity.value) # Id = 5, 
         connection.execute(query)
-        query = db.insert(predicates).values(Id = 6, iri = StandardPredicates._wikidata_id.value)
+        query = db.insert(predicates).values(iri = StandardPredicates._wikidata_id.value) # Id = 6, 
         connection.execute(query)
         
         connection.commit()
@@ -82,8 +85,8 @@ class Migration:
         engine = self.sql_connection._engine
         metadata = db.MetaData()
 
-        db.Table(Entities._table_name, metadata, autoload_with=engine).drop(engine, checkfirst=True)
-        db.Table(Predicates._table_name, metadata, autoload_with=engine).drop(engine, checkfirst=True)
+        db.Table(Entities._table_name, metadata).drop(engine, checkfirst=True)  # autoload_with=engine (было в db.Table)
+        db.Table(Predicates._table_name, metadata).drop(engine, checkfirst=True)  # autoload_with=engine (было в db.Table)
 
         self.sparql_connection.drop_graph(Environment._scheme)
         self.sparql_connection.commit()

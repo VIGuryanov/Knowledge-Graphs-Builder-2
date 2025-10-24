@@ -1,8 +1,13 @@
 import sqlalchemy as db
 
-class VirtuosoSQL:
-    def __init__(self, login, password):#, autocommit = False):
-        self._engine = db.create_engine(f'virtuoso+pyodbc://{login}:{password}@VOS')
+class PostgreSQL:
+    def __init__(self, login, password, debug=False):#, autocommit = False):
+        """Параметр debug включает лог SQLAlchemy"""
+        # self._engine = db.create_engine(f'virtuoso+pyodbc://{login}:{password}@VOS')
+        kwargs = {}
+        if debug:
+            kwargs['echo'] = True
+        self._engine = db.create_engine(f'postgresql://{login}:{password}@localhost:5432/postgres', **kwargs)
         self.__metadata = db.MetaData()
         self.__connection = self._engine.connect()
 
@@ -15,8 +20,8 @@ class VirtuosoSQL:
         
         return result[0]
     
-    def update(self, table:str, id, values:dict):
-        table = db.Table(table, self.__metadata, autoload_with=self._engine)
+    def update(self, table_name:str, id, values:dict):
+        table = db.Table(table_name, self.__metadata, autoload_with=self._engine)
         query = db.update(table).where(table.c.Id == id).values(values)
 
         result = self.__connection.execute(query)

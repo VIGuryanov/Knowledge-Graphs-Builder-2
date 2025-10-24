@@ -1,11 +1,11 @@
 from lib.virtuoso_SPARQL import VirtuosoSPARQLAuth, VirtuosoSPARQL
-import lib.virtuoso_SQL as virtuosoSQL
+import lib.postgres_SQL as postgresSQL
 from lib.triple import Triple, TripleItemType, TripleItemIri, TripleItemStr, TripleItemVariable
 from database_models.DBModels import GraphModelBase, Entities, Predicates
 from lib.standard_predicates import StandardPredicates
 
 class GraphLogic:   
-    def __init__(self, sparql_connection: VirtuosoSPARQLAuth, sql_connection: virtuosoSQL.VirtuosoSQL, graph_include_metadata = True):
+    def __init__(self, sparql_connection: VirtuosoSPARQLAuth, sql_connection: postgresSQL.PostgreSQL, graph_include_metadata = True):
         self.__sparql_connection = sparql_connection
         self.__sql_connection = sql_connection
         self.__graph_include_metadata = graph_include_metadata
